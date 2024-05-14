@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 import apiRequest from "../../lib/apiRequest";
-
+import {toast} from "react-toastify"
 function Register() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,9 +27,16 @@ function Register() {
         password,
       });
 
+      toast.success('Registration successful!');
+
+      
       navigate("/login");
     } catch (err) {
-      setError(err.response.data.message);
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("An error occurred while processing your request.");
+      }
     } finally {
       setIsLoading(false);
     }

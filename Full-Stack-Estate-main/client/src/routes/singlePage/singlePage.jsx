@@ -7,6 +7,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import apiRequest from "../../lib/apiRequest";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function SinglePage() {
   const post = useLoaderData();
@@ -50,20 +51,55 @@ function SinglePage() {
     }
   };
 
+
+
   const handleDeletePost = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this post?"
-    );
-    if (confirmDelete) {
-      try {
-        await apiRequest.delete(`/posts/${post.id}`);
-        alert("Post deleted successfully.");
-        navigate("/profile");
-      } catch (error) {
-        console.error("Failed to delete post:", error);
+    // Display toast for confirmation
+    toast.info(
+      <>
+        Are you sure you want to delete this post? 
+        <div className="confirmation-buttons">
+          <button onClick={confirmDelete}>Yes</button>
+          <button onClick={cancelDelete}>No</button>
+        </div>
+      </>, 
+      {
+        toastId: "confirm-delete",
+        position: "top-center",
+        autoClose: false,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined
       }
+    );
+  };
+  
+  const confirmDelete = () => {
+    toast.dismiss("confirm-delete");
+
+    deletePost();
+  };
+  
+  const cancelDelete = () => {
+  
+    toast.dismiss("confirm-delete");
+  
+    toast.warn("Post deletion canceled.", { toastId: "cancel-delete" });
+  };
+  
+  const deletePost = async () => {
+    try {
+      await apiRequest.delete(`/posts/${post.id}`);
+      toast.success("Post deleted successfully.", { toastId: "delete-success" });
+      navigate("/profile");
+    } catch (error) {
+      console.error("Failed to delete post:", error);
     }
   };
+  
+  
 
   return (
     <div className="singlePage">

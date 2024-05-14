@@ -5,19 +5,50 @@ import "react-quill/dist/quill.snow.css";
 import apiRequest from "../../lib/apiRequest";
 import UploadWidget from "../../components/uploadWidget/UploadWidget";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function NewPostPage() {
   const [value, setValue] = useState("");
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const inputs = Object.fromEntries(formData);
-
+    // Check if all required fields are filled
+    const requiredFields = [
+      "title",
+      "price",
+      "address",
+      "city",
+      "bedroom",
+      "bathroom",
+      "latitude",
+      "longitude",
+      "type",
+      "property",
+      "utilities",
+      "pet",
+      "income",
+      "size",
+      "school",
+      "bus",
+      "restaurant",
+    ];
+    const missingFields = requiredFields.filter((field) => !inputs[field]);
+    if (missingFields.length > 0) {
+      toast.error(
+        `Please fill in all required fields: ${missingFields.join(", ")}`
+      );
+      return;
+    }
+    if (images.length === 0) {
+      toast.error("Please upload at least one image.");
+      return;
+    }
     try {
       const res = await apiRequest.post("/posts", {
         postData: {
@@ -44,7 +75,9 @@ function NewPostPage() {
           restaurant: parseInt(inputs.restaurant),
         },
       });
-      navigate("/"+res.data.id)
+      navigate("/" + res.data.id);
+      toast.success("Post added successfully!");
+
     } catch (err) {
       console.log(err);
       setError(error);

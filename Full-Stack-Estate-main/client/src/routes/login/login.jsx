@@ -3,6 +3,7 @@ import "./login.scss";
 import { Link, useNavigate } from "react-router-dom";
 import apiRequest from "../../lib/apiRequest";
 import { AuthContext } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
 function Login() {
   const [error, setError] = useState("");
@@ -28,10 +29,17 @@ function Login() {
       });
 
       updateUser(res.data)
+      toast.success('Login successful!');
 
       navigate("/");
     } catch (err) {
-      setError(err.response.data.message);
+      if (err.response && err.response.data && err.response.data.message) {
+       
+        toast.error(err.response.data.message);
+      } else {
+        
+        toast.error("An error occurred while processing your request.");
+      }
     } finally {
       setIsLoading(false);
     }
