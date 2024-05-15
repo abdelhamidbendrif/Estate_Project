@@ -16,17 +16,21 @@ function AgentsPage() {
       id: 2,
       name: "AbdelHamid Ben Drif",
       imageUrl: "/Abdelhamid.jpg",
-      email: "AbdelHamid-Ben-Drif@gmail.com",
+      email: "hamid@gmail.com",
       phone: "06 41 55 95 80",
     },
     {
       id: 3,
       name: "Abdelouahed ID Boubrik",
       imageUrl: "/abdelouahed.png",
-      email: "Abdelouahed-ID-Boubrik@gmail.com",
+      email: "abdo@gmail.com",
       phone: "06 41 55 95 80",
     },
   ];
+
+  const sendMessage = (agentEmail) => {
+    window.location.href = `mailto:${agentEmail}`;
+  };
 
   return (
     <div className="agentsPage">
@@ -37,12 +41,17 @@ function AgentsPage() {
             <div key={agent.id} className="agentCard">
               <img src={agent.imageUrl} alt={agent.name} />
               <h2>{agent.name}</h2>
-              <p>Email: {agent.email}</p>
-              <p>Phone: {agent.phone}</p>
+              <p className="email">Email: {agent.email}</p>
+              <p className="phone">Phone: {agent.phone}</p>
+              <button onClick={() => sendMessage(agent.email)}>Contact</button>
             </div>
           ))}
         </div>
       </div>
+      <p className="additionalInfo">
+        For any inquiries or assistance, feel free to contact one of our agents
+        listed above.
+      </p>
     </div>
   );
 }

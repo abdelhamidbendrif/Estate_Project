@@ -29,29 +29,27 @@ function SinglePage() {
       setSaved((prev) => !prev);
     }
   };
-
   const handleSendMessage = async () => {
     try {
       const existingChatResponse = await apiRequest.get("/chats");
       const existingChat = existingChatResponse.data.find((chat) =>
         chat.userIDs.includes(post.userId)
       );
-
+  
       if (existingChat) {
-        alert("You already have a chat with the owner of this post.");
+        // Navigate to the ProfilePage where the chat is displayed
+        navigate("/profile");
       } else {
         const response = await apiRequest.post("/chats", {
           receiverId: post.userId,
         });
-
+  
         navigate("/profile");
       }
     } catch (error) {
       console.error("Failed to create or check chat:", error);
     }
   };
-
-
 
   const handleDeletePost = async () => {
     // Display toast for confirmation
