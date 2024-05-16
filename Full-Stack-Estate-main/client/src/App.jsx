@@ -79,7 +79,7 @@ function App() {
           element: <UpdatePostPage />,
         },
         {
-          path: "/profile/:userId", // Update to use :userId instead of :id
+          path: "/profile/:userId", 
           element: <ProfileUser />,
         },
         

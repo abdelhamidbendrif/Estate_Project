@@ -112,37 +112,36 @@ export const readChat = async (req, res) => {
   }
 };
 
-
 export const deleteChat = async (req, res) => {
-  const tokenUserId = req.userId;
+  const userId = req.userId; // Use req.userId
+  console.log('Deleting chat for user:', userId); // Debug log
   const chatId = req.params.id;
 
   try {
-    // Check if the chat exists and belongs to the user
-    const existingChat = await prisma.chat.findUnique({
-      where: {
-        id: chatId,
-        userIDs: {
-          hasSome: [tokenUserId],
-        },
-      },
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      select: { deletedBy: true },
     });
 
-    if (!existingChat) {
-      return res.status(404).json({ message: "Chat not found" });
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
     }
 
-    // Delete the chat
-    await prisma.chat.delete({
-      where: {
-        id: chatId,
-      },
+    const deletedBy = chat.deletedBy || [];
+    if (!deletedBy.includes(userId)) {
+      deletedBy.push(userId);
+    }
+
+    await prisma.chat.update({
+      where: { id: chatId },
+      data: { deletedBy },
     });
 
     res.status(200).json({ message: "Chat deleted successfully" });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: "Failed to delete chat" });
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete chat" });
   }
 };
+
 

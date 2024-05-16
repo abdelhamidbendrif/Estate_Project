@@ -5,6 +5,8 @@ import {
   addChat,
   readChat,
   deleteChat,
+   // Import the function for soft deleting chats
+
 } from "../controllers/chat.controller.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 

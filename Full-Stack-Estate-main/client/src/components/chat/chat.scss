@@ -63,10 +63,43 @@
           object-fit: cover;
         }
       }
+
       .close {
         cursor: pointer;
+        padding: 5px 10px;
+        background-color: #f0545429;
+        /* Light red background color */
+        border: none;
+        border-radius: 5px;
+        color: #f05454;
+        /* Red color for text */
+        font-weight: bold;
+        /* Add some margin to the right */
+        margin-right: 10px;
+      }
+
+      .deleteButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        margin-right: -210px;
+        transition: all 0.3s ease;
+
+      }
+
+      .deleteButton:hover {
+        transform: scale(1.1);
+
+      }
+
+      .deleteButton img {
+        width: 25px;
+        height: 25px;
+
       }
     }
+
     .center {
       height: 350px;
       overflow: scroll;
@@ -75,15 +108,15 @@
       flex-direction: column;
       gap: 20px;
 
-      .chatMessage{
+      .chatMessage {
         width: 50%;
 
-        &.own{
+        &.own {
           align-self: flex-end;
           text-align: right;
         }
 
-        span{
+        span {
           font-size: 12px;
           background-color: #f7c14b39;
           padding: 2px;
@@ -91,6 +124,7 @@
         }
       }
     }
+
     .bottom {
       border-top: 2px solid #f7c14b85;
       height: 60px;
@@ -98,20 +132,60 @@
       align-items: center;
       justify-content: space-between;
 
-      textarea{
-        flex:3;
+      textarea {
+        flex: 3;
         height: 100%;
         border: none;
         padding: 20px;
       }
 
-      button{
-        flex:1;
+      button {
+        flex: 1;
         background-color: #f7c14b85;
         height: 100%;
         border: none;
         cursor: pointer;
       }
+
     }
   }
+  .avatarWrapper {
+    position: relative; 
+    cursor: pointer;/* This allows the dropdownMenu to be positioned relative to this element */
+  }
+  
+  .dropdownMenu {
+    position: absolute;
+    top: 100%; /* This positions the dropdownMenu below the avatar */
+    left: 0; /* This aligns the dropdownMenu to the left of the avatar */
+    background-color: #f9f9f9;
+    min-width: 150px; /* Adjusted for better appearance */
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 5px; /* Add rounded corners */
+    padding: 10px; /* Add some padding */
+    display: flex; /* Flexbox to align items better */
+    flex-direction: column; /* Column direction for stacking items */
+  }
+  
+  .dropdownMenu button {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex; /* Flexbox to align icon and text */
+    align-items: center; /* Center align items vertically */
+    border: none; /* Remove button border */
+    background: none; /* Remove button background */
+    cursor: pointer; /* Change cursor on hover */
+    width: 100%; /* Make the button take the full width of the .dropdownMenu */
+    margin: 5px 0; /* Add some margin between buttons */
+  }
+  
+  .deleteIcon {
+    margin-right: 8px; /* Space between the icon and the text */
+  }
+
+  
+  
+  
 }

@@ -5,15 +5,35 @@ import apiRequest from "../../lib/apiRequest";
 import { format } from "timeago.js";
 import { SocketContext } from "../../context/SocketContext";
 import { useNotificationStore } from "../../lib/notificationStore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-function Chat({ chats }) {
-  const [chat, setChat] = useState(null);
+function Chat({ chats: initialChats }) {
   const { currentUser } = useContext(AuthContext);
   const { socket } = useContext(SocketContext);
-
+  const [chats, setChats] = useState(
+    initialChats.filter((chat) => !chat.deletedBy?.includes(currentUser.id))
+  );
+  const [chat, setChat] = useState(null);
   const messageEndRef = useRef();
-
   const decrease = useNotificationStore((state) => state.decrease);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownVisible(false);
+      }
+    }
+
+    // Bind the event listener
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      // Unbind the event listener on clean up
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -73,8 +93,71 @@ function Chat({ chats }) {
     };
   }, [socket, chat]);
 
+  const confirmDeleteChat = async () => {
+    try {
+      await apiRequest.delete("/chats/" + chat.id);
+      setChats((prevChats) => prevChats.filter((c) => c.id !== chat.id));
+      setChat(null);
+      toast.success("Chat deleted successfully!");
+            toast.dismiss();
+
+    } catch (err) {
+      console.log(err);
+      toast.error("Failed to delete chat.");
+    }
+  };
+
+  const handleDeleteChat = () => {
+    toast(
+      <div>
+        <p>Are you sure you want to delete this chat?</p>
+        <div
+          style={{
+            display: "flex",
+
+            marginTop: "10px",
+          }}
+        >
+          <button
+            onClick={confirmDeleteChat}
+            style={{
+              marginRight: "10px",
+
+              backgroundColor: "green",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            Yes
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            style={{
+              backgroundColor: "red",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              padding: "5px 10px",
+              cursor: "pointer",
+            }}
+          >
+            No
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+      }
+    );
+  };
+
   return (
     <div className="chat">
+      <ToastContainer />
       <div className="messages">
         <h1>Messages</h1>
         {chats?.map((c) => (
@@ -99,10 +182,29 @@ function Chat({ chats }) {
         <div className="chatBox">
           <div className="top">
             <div className="user">
-              <img src={chat.receiver.avatar || "noavatar.jpg"} alt="" />
+              <div className="avatarWrapper">
+                <img
+                  src={chat.receiver.avatar || "noavatar.jpg"}
+                  alt=""
+                  onClick={() => setIsDropdownVisible(!isDropdownVisible)} // Toggle dropdown on avatar click
+                />
+                {isDropdownVisible && (
+                  <div className="dropdownMenu" ref={dropdownRef}>
+                    <button onClick={handleDeleteChat} className="deleteButton">
+                      <img
+                        src="/deletered.png"
+                        alt="Delete"
+                        className="deleteIcon"
+                      />
+                      Delete Chat
+                    </button>
+                  </div>
+                )}
+              </div>
               {chat.receiver.username}
             </div>
-            <span className="close" onClick={() => setChat(null)}>
+
+            <span className="close" onClick={() => setChat(null)} title="close">
               X
             </span>
           </div>
