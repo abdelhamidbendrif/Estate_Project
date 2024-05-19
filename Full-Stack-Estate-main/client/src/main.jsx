@@ -11,8 +11,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <AuthContextProvider>
       <SocketContextProvider>
         <ToastContainer/>
-          <App />
-       
+          <App />   
       </SocketContextProvider>
     </AuthContextProvider>
   </React.StrictMode>

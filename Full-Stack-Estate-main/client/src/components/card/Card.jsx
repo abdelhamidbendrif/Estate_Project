@@ -1,15 +1,31 @@
-import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import "./card.scss";
+import { toast } from "react-toastify";
 
 function Card({ item }) {
+  const { currentUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleCardClick = (e) => {
+    if (!currentUser) {
+      e.preventDefault();
+      toast.warn("You need to log in to view this post!");
+      navigate("/login");  // Assuming there's a login route
+    }
+  };
+
   return (
     <div className="card">
-      <Link to={`/${item.id}`} className="imageContainer">
+      <Link to={`/${item.id}`} className="imageContainer" onClick={handleCardClick}>
         <img src={item.images[0]} alt="" />
       </Link>
       <div className="textContainer">
         <h2 className="title">
-          <Link to={`/${item.id}`}>{item.title}</Link>
+          <Link to={`/${item.id}`} onClick={handleCardClick}>
+            {item.title}
+          </Link>
         </h2>
         <p className="address">
           <img src="/pin.png" alt="" />

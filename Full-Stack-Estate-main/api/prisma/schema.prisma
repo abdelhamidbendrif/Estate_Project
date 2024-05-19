@@ -81,6 +81,10 @@ model User {
   savedPosts SavedPost[]
   chats      Chat[]      @relation(fields: [chatIDs], references: [id])
   chatIDs    String[]    @db.ObjectId
+  ratings    Rating[]    @relation("UserRatings")
+  givenRatings Rating[]  @relation("GivenRatings")
+  avgRating      Float       @default(0)
+  numberOfRatings Int        @default(0)
 }
 
 model Chat {
@@ -101,5 +105,15 @@ model Message {
   userId    String
   chat      Chat     @relation(fields: [chatId], references: [id])
   chatId    String   @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+model Rating {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  rating    Int
+  userId    String   @db.ObjectId
+  raterId   String   @db.ObjectId
+  user      User     @relation("UserRatings", fields: [userId], references: [id])
+  rater     User     @relation("GivenRatings", fields: [raterId], references: [id])
   createdAt DateTime @default(now())
 }

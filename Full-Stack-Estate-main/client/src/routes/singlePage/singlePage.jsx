@@ -116,10 +116,10 @@ function SinglePage() {
               </div>
               <div className="user">
                 {isCurrentUserPost ? (
-                  <img src={post.user.avatar} alt="" />
+                  <img src={post.user.avatar || "/noavatar.jpg"} alt="" />
                 ) : (
                   <Link to={`/profile/${post.userId}`}>
-                    <img src={post.user.avatar} alt="" />
+                    <img src={post.user.avatar || "/noavatar.jpg"} alt="" />
                   </Link>
                 )}
                 <span>{post.user.username}</span>

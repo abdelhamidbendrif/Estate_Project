@@ -16,6 +16,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.3",
+    "google-auth-library": "^9.10.0",
     "jsonwebtoken": "^9.0.2",
     "prisma": "^5.11.0"
   }

@@ -1,18 +1,34 @@
+import React, { Suspense, useContext, useEffect, useState } from "react";
+import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
+import apiRequest from "../../lib/apiRequest";
+import { toast } from "react-toastify";
 import Chat from "../../components/chat/Chat";
 import List from "../../components/list/List";
+import Rater from "react-rater";
+import "react-rater/lib/react-rater.css";
 import "./profilePage.scss";
-import apiRequest from "../../lib/apiRequest";
-import { Await, Link, useLoaderData, useNavigate } from "react-router-dom";
-import { Suspense, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { toast } from "react-toastify";
 
 function ProfilePage() {
   const data = useLoaderData();
-
-  const { updateUser, currentUser } = useContext(AuthContext);
-
+  const { currentUser, fetchCurrentUser, updateUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [rating, setRating] = useState(0); // State to track the rating
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchCurrentUser();
+        if (currentUser) {
+          setRating(currentUser.avgRating || 0);
+        }
+      } catch (error) {
+        console.log("Error fetching current user data:", error);
+      }
+    };
+
+    fetchData();
+  }, [fetchCurrentUser, currentUser]);
 
   const handleLogout = async () => {
     try {
@@ -24,6 +40,7 @@ function ProfilePage() {
       console.log(err);
     }
   };
+
   return (
     <div className="profilePage">
       <div className="details">
@@ -35,16 +52,31 @@ function ProfilePage() {
             </Link>
           </div>
           <div className="info">
-            <span>
+            <div className="avatar">
               Avatar:
-              <img src={currentUser.avatar || "noavatar.jpg"} alt="" />
-            </span>
-            <span>
-              Username: <b>{currentUser.username}</b>
-            </span>
-            <span>
-              E-mail: <b>{currentUser.email}</b>
-            </span>
+              <img
+                src={currentUser?.avatar || "noavatar.jpg"}
+                alt="User Avatar"
+              />
+            </div>
+            <div>
+              Username: <b>{currentUser?.username}</b>
+            </div>
+            <div>
+              E-mail: <b>{currentUser?.email}</b>
+            </div>
+            <div className="rating">
+              Average Rating:
+              <Rater
+                total={5}
+                rating={rating}
+                interactive={false}
+                style={{ fontSize: "25px" }}
+                className="custom-rater"
+              />
+              ({currentUser?.numberOfRatings}{" "}
+              {currentUser?.numberOfRatings === 1 ? "rating" : "ratings"})
+            </div>
             <button onClick={handleLogout}>Logout</button>
           </div>
           <div className="title">
@@ -81,7 +113,7 @@ function ProfilePage() {
               resolve={data.chatResponse}
               errorElement={<p>Error loading chats!</p>}
             >
-              {(chatResponse) => <Chat chats={chatResponse.data}/>}
+              {(chatResponse) => <Chat chats={chatResponse.data} />}
             </Await>
           </Suspense>
         </div>

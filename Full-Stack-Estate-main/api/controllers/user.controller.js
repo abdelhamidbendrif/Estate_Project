@@ -11,16 +11,28 @@ export const getUsers = async (req, res) => {
   }
 };
 
+
 export const getUser = async (req, res) => {
   const id = req.params.id;
   try {
     const user = await prisma.user.findUnique({
       where: { id },
     });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+
+    const ratings = await prisma.rating.findMany({
+      where: { userId: id },
+    });
+
+    const avgRating = ratings.length > 0 ? ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length : 0;
+    const numberOfRatings = ratings.length;
+
+    console.log("User ratings fetched:", { avgRating, numberOfRatings }); // Debug log
+
+    res.status(200).json({ ...user, avgRating, numberOfRatings });
   } catch (err) {
     console.error("Error fetching user:", err);
     res.status(500).json({ message: "Failed to get user" });
@@ -113,9 +125,10 @@ export const savePost = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Failed to delete users!" });
+    res.status(500).json({ message: "Failed to save post!" });
   }
 };
+
 
 export const profilePosts = async (req, res) => {
   const tokenUserId = req.userId;
@@ -156,6 +169,97 @@ export const getNotificationNumber = async (req, res) => {
     res.status(200).json(number);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Failed to get profile posts!" });
+    res.status(500).json({ message: "Failed to get notifications!" });
+  }
+};
+
+export const rateUser = async (req, res) => {
+  const { id } = req.params;
+  const { rating } = req.body;
+  const raterId = req.userId;
+
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: "Invalid rating value" });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if the rater has already rated the user
+    const existingRating = await prisma.rating.findFirst({
+      where: {
+        userId: id,
+        raterId,
+      },
+    });
+
+    if (existingRating) {
+      // Update the existing rating
+      await prisma.rating.update({
+        where: { id: existingRating.id },
+        data: { rating },
+      });
+    } else {
+      // Create a new rating
+      await prisma.rating.create({
+        data: {
+          userId: id,
+          raterId,
+          rating,
+        },
+      });
+    }
+
+    // Recalculate the average rating and number of ratings
+    const ratings = await prisma.rating.findMany({
+      where: { userId: id },
+    });
+    const avgRating = ratings.reduce((acc, r) => acc + r.rating, 0) / ratings.length;
+    const numberOfRatings = ratings.length;
+
+    // Update the user with new average rating and number of ratings
+    await prisma.user.update({
+      where: { id },
+      data: {
+        avgRating,
+        numberOfRatings,
+      },
+    });
+
+    res.status(200).json({ message: "Rating submitted successfully", avgRating, numberOfRatings });
+  } catch (err) {
+    console.error("Error submitting rating:", err);
+    res.status(500).json({ message: "Failed to submit rating" });
+  }
+};
+
+
+
+export const getUserRatingByRater = async (req, res) => {
+  const { id } = req.params;
+  const raterId = req.userId;
+
+  try {
+    const rating = await prisma.rating.findFirst({
+      where: {
+        userId: id,
+        raterId,
+      },
+    });
+
+    if (!rating) {
+      return res.status(404).json({ message: "No rating found for this user by you" });
+    }
+
+    res.status(200).json({ rating: rating.rating });
+  } catch (err) {
+    console.error("Error fetching rating:", err);
+    res.status(500).json({ message: "Failed to fetch rating" });
   }
 };
